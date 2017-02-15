@@ -18,6 +18,11 @@ package com.fgarmo.plgoto;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
@@ -28,16 +33,24 @@ public class Main {
 
 	public static void main(String[] args) {
 		try{
-			FileInputStream f = new FileInputStream(args[0]); 
-			Analex analex = new Analex(f);
-	        
+			//first, load several source files, like macros and, finally, the program
+			List<InputStream> allFiles = new ArrayList<InputStream>();
+			for(String a: args){
+				allFiles.add(new FileInputStream(a));				
+			}
+			InputStream is = new SequenceInputStream(Collections.enumeration(allFiles));
+			
+			//Lexer and parser
+			Analex analex = new Analex(is);
 	        Anasint anasint = new Anasint(analex);
 	        anasint.program();
 	        AST a = anasint.getAST();
 	        
+	        //show window with AST
 	        ASTFrame af = new ASTFrame(args[0],a);
 	        af.setVisible(true);
 	        
+	        //compiler
 	        Anasint2 anasint2 = new Anasint2();
 	       	anasint2.program(a);
 		}
