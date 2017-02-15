@@ -1,0 +1,19 @@
+// $ANTLR : Anasint.g -> AnasintTokenTypes.txt$
+Anasint    // output token vocab name
+INSTRUCTIONS=4
+LEFT_LABEL=5
+ID=6
+ASSIG=7
+LSB=8
+IF=9
+GOTO=10
+RSB=11
+PLUS=12
+MINUS=13
+EQUAL=14
+DISTINCT=15
+GREATER=16
+GREATEREQ=17
+LOWER=18
+LOWEREQ=19
+NUMBER=20
