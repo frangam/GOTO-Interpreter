@@ -1,8 +1,8 @@
-// $ANTLR : "Analex.g" -> "Analex.java"$
+// $ANTLR : "Anasint.g" -> "Anasint.java"$
 
 	package com.fgarmo.plgoto;
 
-public interface AnalexTokenTypes {
+public interface AnasintTokenTypes {
 	int EOF = 1;
 	int NULL_TREE_LOOKAHEAD = 3;
 	int PROGRAM = 4;
@@ -26,9 +26,4 @@ public interface AnalexTokenTypes {
 	int LOWER = 22;
 	int LOWEREQ = 23;
 	int NUMBER = 24;
-	int NL = 25;
-	int BTF = 26;
-	int DIGIT = 27;
-	int LETTER = 28;
-	int COMMA = 29;
 }

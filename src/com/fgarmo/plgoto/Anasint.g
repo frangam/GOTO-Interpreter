@@ -29,15 +29,28 @@ options{
 }
 
 tokens{ 
+	PROGRAM;
+	MACRO;
 	INSTRUCTIONS;
 	LEFT_LABEL;
 }
 
 // The Program
-program: (instruction)* 
-	{#program = #(#[INSTRUCTIONS,"INSTRUCTIONS"], ##);}
+program: order
+	{#program = #(#[PROGRAM,"PROGRAM"], ##);}
 ;
 
+order: (DEFMACRO)=> macro_def order
+	| instructions
+	;
+
+instructions: (instruction)*
+	{#instructions = #(#[INSTRUCTIONS,"INSTRUCTIONS"], ##);}
+;
+
+macro_def: DEFMACRO! instruction (instruction)* ENDMACRO!
+	{#macro_def = #(#[MACRO,"MACRO"], ##);}
+;
 
 instruction : (ID ASSIG)=> assigment
 	| (LSB ID)=> labelled_instruction
@@ -49,7 +62,6 @@ basic_instruction: (ID ASSIG)=> assigment
 	;
 	
 assigment: ID ASSIG^ expr
-
 ;
 
 conditional: IF^ expr_bool GOTO^ ID
@@ -76,4 +88,3 @@ expr_bool : (expr EQUAL)=> expr EQUAL^ expr_bool
 atom: ID
 	| NUMBER
 	;
-

@@ -27,6 +27,8 @@ options{
 	testLiterals=false;
 }
 
+
+
 protected NL: "\n" {newline();};
 BTF: (' '|'\t'|NL) {$setType(Token.SKIP);};
 
@@ -56,3 +58,5 @@ DISTINCT: "!=";
 
 IF: "IF";
 GOTO: "GOTO";
+DEFMACRO: "#MACRO";
+ENDMACRO: "#ENDMACRO";	

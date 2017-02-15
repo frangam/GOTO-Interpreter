@@ -125,6 +125,14 @@ tryAgain:
 						mGOTO(true);
 						theRetToken=_returnToken;
 					}
+					else if ((LA(1)=='#') && (LA(2)=='M')) {
+						mDEFMACRO(true);
+						theRetToken=_returnToken;
+					}
+					else if ((LA(1)=='#') && (LA(2)=='E')) {
+						mENDMACRO(true);
+						theRetToken=_returnToken;
+					}
 					else if (((LA(1) >= 'A' && LA(1) <= 'Z')) && (true)) {
 						mID(true);
 						theRetToken=_returnToken;
@@ -409,6 +417,32 @@ tryAgain:
 		int _saveIndex;
 		
 		match("GOTO");
+		if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
+			_token = makeToken(_ttype);
+			_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));
+		}
+		_returnToken = _token;
+	}
+	
+	public final void mDEFMACRO(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
+		int _ttype; Token _token=null; int _begin=text.length();
+		_ttype = DEFMACRO;
+		int _saveIndex;
+		
+		match("#MACRO");
+		if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
+			_token = makeToken(_ttype);
+			_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));
+		}
+		_returnToken = _token;
+	}
+	
+	public final void mENDMACRO(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
+		int _ttype; Token _token=null; int _begin=text.length();
+		_ttype = ENDMACRO;
+		int _saveIndex;
+		
+		match("#ENDMACRO");
 		if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
 			_token = makeToken(_ttype);
 			_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));
