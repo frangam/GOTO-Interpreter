@@ -38,8 +38,8 @@ public class Main {
 	        ASTFrame af = new ASTFrame(args[0],a);
 	        af.setVisible(true);
 	        
-	       // Anasint2 anasint2 = new Anasint2();
-	        //anasint2.programa(a);  
+	        Anasint2 anasint2 = new Anasint2();
+	       	anasint2.program(a);
 		}
 		catch(FileNotFoundException e) {
 			System.out.println("Error in file");

@@ -1,30 +1,5 @@
-#MACRO 	X1<-X2
-[A2]	X1<-X1-1
-		IF X1!=0 GOTO A2
-[A]		IF X2!=0 GOTO B
-		Z2<-Z2+1
-		IF Z2!=0 GOTO C
-[B]		X2<-X2-1
-		X1<-X1+1
-		Z<-Z+1
-		Z3<-Z3+1
-		IF Z3!=0 GOTO A
-[C]		IF Z!=0 GOTO D
-		Z4<-Z4+1
-		IF Z4!=0 GOTO L
-[D]		Z<-Z-1
-		X2<-X2+1
-		Z5<-Z5+1
-		IF Z5!=0 GOTO C
-#ENDMACRO
-
-#MACRO 	X1<-X1+X2
-[A2]	X1<-X1-1
-#ENDMACRO
-
-
 [A]	X1<-X1+1
-X3<-X3-1
-[A] X1<-X1+1
-[B] X2<-X2-1
+X2<-X2-1
+[A] X1<-X1-1
+[B] X2<-X2+1
 IF X2!=0 GOTO A

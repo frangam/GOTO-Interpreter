@@ -61,10 +61,10 @@ basic_instruction: (ID ASSIG)=> assigment
 	| conditional
 	;
 	
-assigment: ID ASSIG^ expr
+assigment: ID ASSIG^ expr_arithm
 ;
 
-conditional: IF^ expr_bool GOTO^ ID
+conditional: IF^ expr GOTO^ ID
 ;
 
 labelled_instruction: LSB! ID^ RSB! basic_instruction
@@ -72,19 +72,18 @@ labelled_instruction: LSB! ID^ RSB! basic_instruction
 ;
 
 // Expressions
-expr: (atom (PLUS | MINUS))=> atom (PLUS^ | MINUS^) expr
-	| atom
-	;
-	
-expr_bool : (expr EQUAL)=> expr EQUAL^ expr_bool
-	| (expr DISTINCT)=> expr DISTINCT^ expr_bool
-	| (expr GREATER)=> ID GREATER^ expr_bool
-	| (expr GREATEREQ)=> expr GREATEREQ^ expr_bool
-	| (expr LOWER)=> expr LOWER^ expr_bool
-	| (expr LOWEREQ)=> expr LOWEREQ^ expr_bool
-	| expr
-	;
+expr : expr_arithm ((LOWER^ | GREATER^ | LOWEREQ^ | GREATEREQ^ | EQUAL^ | DISTINCT^) expr_arithm)?
+;
 
-atom: ID
-	| NUMBER
+expr_arithm: atom ((PLUS^ | MINUS^) atom)*
+;
+
+//expr_arithm: expr_mult ((PLUS^ | MINUS^) expr_mult)*
+//;
+
+//expr_mult: atom ((MUL^ | DIV^) atom)*
+//;
+
+atom: NUMBER
+	| ID
 	;

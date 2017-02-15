@@ -23,7 +23,7 @@ class Analex extends Lexer;
 options{
 	importVocab = Anasint;
 	k=2;
-	charVocabulary='\u0000'..'\uFFFE'; //allow unicode characters
+	charVocabulary='\u0000'..'\uFFFE'; //allow unicode characters for the future
 	testLiterals=false;
 }
 
