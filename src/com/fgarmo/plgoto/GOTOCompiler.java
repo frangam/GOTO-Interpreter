@@ -31,6 +31,7 @@ import antlr.collections.AST;
 import antlr.debug.misc.ASTFrame;
 
 public class GOTOCompiler {
+	public static final int LAST_SPECIAL_PARAMETERS = 1;
 	public static int result = 0;
 	public static boolean lexicalAnalysisDone = false;
 	
@@ -39,8 +40,8 @@ public class GOTOCompiler {
 		try{
 			//first, load several source files, like macros and, finally, the program
 			List<InputStream> allFiles = new ArrayList<InputStream>();
-			for(String a: args){
-				allFiles.add(new FileInputStream(a));				
+			for(int i=0; i<args.length-LAST_SPECIAL_PARAMETERS; i++){
+				allFiles.add(new FileInputStream(args[i]));				
 			}
 			InputStream is = new SequenceInputStream(Collections.enumeration(allFiles));
 			System.out.println("Loaded GOTO files");
@@ -59,14 +60,19 @@ public class GOTOCompiler {
 	        AST a = anasint.getAST();
 	        
 	        //show window with AST
-	        ASTFrame af = new ASTFrame(args[0],a);
-	        af.setVisible(true);
+	        boolean showAST = Boolean.valueOf(args[args.length-1]);
+	        if(showAST){
+		        ASTFrame af = new ASTFrame(args[0],a);
+		        af.setVisible(true);
+	        }
 	        
 	        System.out.println("Running program");
 	        //compiler
 	        Anasint2 anasint2 = new Anasint2();
 	       	anasint2.program(a);
 	       	
+	       	
+	       	args[0] = String.valueOf(result);
 	       	System.out.println("Program finished. Y = "+result);
 		}
 		catch(FileNotFoundException e) {
@@ -81,44 +87,5 @@ public class GOTOCompiler {
 	}
 	
 	
-	
-		
-	public int run(String[] args){
-		try{
-			//first, load several source files, like macros and, finally, the program
-			List<InputStream> allFiles = new ArrayList<InputStream>();
-			for(String a: args){
-				allFiles.add(new FileInputStream(a));				
-			}
-			InputStream is = new SequenceInputStream(Collections.enumeration(allFiles));
-			System.out.println("Loaded GOTO files");
-			
-			//Lexer and parser
-			Analex analex = new Analex(is);
-	        Anasint anasint = new Anasint(analex);
-	        anasint.program();
-	        AST a = anasint.getAST();
-	        
-//	        //show window with AST
-//	        ASTFrame af = new ASTFrame(args[0],a);
-//	        af.setVisible(true);
-	        
-	        //compiler
-	        Anasint2 anasint2 = new Anasint2();
-	       	anasint2.program(a);
-	       	
-		}
-		catch(FileNotFoundException e) {
-			System.out.println("Error in file");
-		}
-		catch(RecognitionException e){
-		   System.out.println("Error in parser analysis");
-		} 
-		catch(TokenStreamException e) {
-			System.out.println("Error in lexical analysis");
-		}
-		
-		return result;
-	}
 
 }
