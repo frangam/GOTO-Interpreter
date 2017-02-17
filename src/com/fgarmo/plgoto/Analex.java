@@ -28,6 +28,11 @@ import antlr.SemanticException;
 
 public class Analex extends antlr.CharScanner implements AnalexTokenTypes, TokenStream
  {
+
+	public void uponEOF() throws TokenStreamException, CharStreamException{
+        GOTOCompiler.lexicalAnalysisDone = true;
+        System.out.println("lexical analysis done");
+    }	
 public Analex(InputStream in) {
 	this(new ByteBuffer(in));
 }

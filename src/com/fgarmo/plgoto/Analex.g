@@ -23,8 +23,15 @@ class Analex extends Lexer;
 options{
 	importVocab = Anasint;
 	k=2;
-	charVocabulary='\u0000'..'\uFFFE'; //allow unicode characters for the future
+	charVocabulary='\u0000'..'\uFFFE'; // allow any char but \uFFFF (16 bit -1)
 	testLiterals=false;
+}
+
+{
+	public void uponEOF() throws TokenStreamException, CharStreamException{
+        GOTOCompiler.lexicalAnalysisDone = true;
+        System.out.println("lexical analysis done");
+    }	
 }
 
 
