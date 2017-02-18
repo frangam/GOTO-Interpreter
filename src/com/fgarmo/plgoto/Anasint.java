@@ -32,7 +32,7 @@ protected Anasint(TokenBuffer tokenBuf, int k) {
 }
 
 public Anasint(TokenBuffer tokenBuf) {
-  this(tokenBuf,1);
+  this(tokenBuf,2);
 }
 
 protected Anasint(TokenStream lexer, int k) {
@@ -43,11 +43,11 @@ protected Anasint(TokenStream lexer, int k) {
 }
 
 public Anasint(TokenStream lexer) {
-  this(lexer,1);
+  this(lexer,2);
 }
 
 public Anasint(ParserSharedInputState state) {
-  super(state,1);
+  super(state,2);
   tokenNames = _tokenNames;
   buildTokenTypeASTClassMap();
   astFactory = new ASTFactory(getTokenTypeToASTClassMap());
@@ -259,6 +259,52 @@ public Anasint(ParserSharedInputState state) {
 		returnAST = instruction_AST;
 	}
 	
+	public final void instruction2() throws RecognitionException, TokenStreamException {
+		
+		returnAST = null;
+		ASTPair currentAST = new ASTPair();
+		AST instruction2_AST = null;
+		
+		try {      // for error handling
+			switch ( LA(1)) {
+			case ID:
+			{
+				assigment();
+				astFactory.addASTChild(currentAST, returnAST);
+				instruction2_AST = (AST)currentAST.root;
+				break;
+			}
+			case IF:
+			{
+				conditional();
+				astFactory.addASTChild(currentAST, returnAST);
+				instruction2_AST = (AST)currentAST.root;
+				break;
+			}
+			case LSB:
+			{
+				labelled_instruction();
+				astFactory.addASTChild(currentAST, returnAST);
+				instruction2_AST = (AST)currentAST.root;
+				break;
+			}
+			default:
+			{
+				throw new NoViableAltException(LT(1), getFilename());
+			}
+			}
+		}
+		catch (RecognitionException ex) {
+			if (inputState.guessing==0) {
+				reportError(ex);
+				recover(ex,_tokenSet_0);
+			} else {
+			  throw ex;
+			}
+		}
+		returnAST = instruction2_AST;
+	}
+	
 	public final void assigment() throws RecognitionException, TokenStreamException {
 		
 		returnAST = null;
@@ -289,6 +335,40 @@ public Anasint(ParserSharedInputState state) {
 		returnAST = assigment_AST;
 	}
 	
+	public final void conditional() throws RecognitionException, TokenStreamException {
+		
+		returnAST = null;
+		ASTPair currentAST = new ASTPair();
+		AST conditional_AST = null;
+		
+		try {      // for error handling
+			AST tmp5_AST = null;
+			tmp5_AST = astFactory.create(LT(1));
+			astFactory.makeASTRoot(currentAST, tmp5_AST);
+			match(IF);
+			expr();
+			astFactory.addASTChild(currentAST, returnAST);
+			AST tmp6_AST = null;
+			tmp6_AST = astFactory.create(LT(1));
+			astFactory.makeASTRoot(currentAST, tmp6_AST);
+			match(GOTO);
+			AST tmp7_AST = null;
+			tmp7_AST = astFactory.create(LT(1));
+			astFactory.addASTChild(currentAST, tmp7_AST);
+			match(ID);
+			conditional_AST = (AST)currentAST.root;
+		}
+		catch (RecognitionException ex) {
+			if (inputState.guessing==0) {
+				reportError(ex);
+				recover(ex,_tokenSet_2);
+			} else {
+			  throw ex;
+			}
+		}
+		returnAST = conditional_AST;
+	}
+	
 	public final void labelled_instruction() throws RecognitionException, TokenStreamException {
 		
 		returnAST = null;
@@ -297,9 +377,9 @@ public Anasint(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			match(LSB);
-			AST tmp6_AST = null;
-			tmp6_AST = astFactory.create(LT(1));
-			astFactory.makeASTRoot(currentAST, tmp6_AST);
+			AST tmp9_AST = null;
+			tmp9_AST = astFactory.create(LT(1));
+			astFactory.makeASTRoot(currentAST, tmp9_AST);
 			match(ID);
 			match(RSB);
 			basic_instruction();
@@ -323,40 +403,6 @@ public Anasint(ParserSharedInputState state) {
 			}
 		}
 		returnAST = labelled_instruction_AST;
-	}
-	
-	public final void conditional() throws RecognitionException, TokenStreamException {
-		
-		returnAST = null;
-		ASTPair currentAST = new ASTPair();
-		AST conditional_AST = null;
-		
-		try {      // for error handling
-			AST tmp8_AST = null;
-			tmp8_AST = astFactory.create(LT(1));
-			astFactory.makeASTRoot(currentAST, tmp8_AST);
-			match(IF);
-			expr();
-			astFactory.addASTChild(currentAST, returnAST);
-			AST tmp9_AST = null;
-			tmp9_AST = astFactory.create(LT(1));
-			astFactory.makeASTRoot(currentAST, tmp9_AST);
-			match(GOTO);
-			AST tmp10_AST = null;
-			tmp10_AST = astFactory.create(LT(1));
-			astFactory.addASTChild(currentAST, tmp10_AST);
-			match(ID);
-			conditional_AST = (AST)currentAST.root;
-		}
-		catch (RecognitionException ex) {
-			if (inputState.guessing==0) {
-				reportError(ex);
-				recover(ex,_tokenSet_2);
-			} else {
-			  throw ex;
-			}
-		}
-		returnAST = conditional_AST;
 	}
 	
 	public final void basic_instruction() throws RecognitionException, TokenStreamException {
@@ -408,7 +454,7 @@ public Anasint(ParserSharedInputState state) {
 			atom();
 			astFactory.addASTChild(currentAST, returnAST);
 			{
-			_loop28:
+			_loop29:
 			do {
 				if ((LA(1)==PLUS||LA(1)==MINUS)) {
 					{
@@ -439,7 +485,7 @@ public Anasint(ParserSharedInputState state) {
 					astFactory.addASTChild(currentAST, returnAST);
 				}
 				else {
-					break _loop28;
+					break _loop29;
 				}
 				
 			} while (true);

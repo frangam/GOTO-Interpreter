@@ -16,10 +16,12 @@
 
 package com.fgarmo.plgoto;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,20 +33,43 @@ import antlr.collections.AST;
 import antlr.debug.misc.ASTFrame;
 
 public class GOTOCompiler {
-	public static final int LAST_SPECIAL_PARAMETERS = 1;
+	public static final int LAST_SPECIAL_PARAMETERS = 2;
 	public static int result = 0;
 	public static boolean lexicalAnalysisDone = false;
 	
 	
+	/**
+	 * Parametters (String):
+	 * 1st params: all of the several .goto files
+	 *  
+	 * 2nd LAST param: input vars values (comma separated values): "1,45,2,1890"
+	 * LAST param: "true" or "false" for showing or not the AST tree frame window 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		try{
 			//first, load several source files, like macros and, finally, the program
 			List<InputStream> allFiles = new ArrayList<InputStream>();
-			for(int i=0; i<args.length-LAST_SPECIAL_PARAMETERS; i++){
-				allFiles.add(new FileInputStream(args[i]));				
+			
+			//parse input var values to GOTO increment instructions
+			if(args.length>2){
+				String inVarValues = parseGOTOInputVarsValuesToGOTOIncInstructions(args[args.length-LAST_SPECIAL_PARAMETERS]);
+				InputStream stream = new ByteArrayInputStream(inVarValues.getBytes(StandardCharsets.UTF_8));
+				
+				allFiles.add(stream);		
 			}
+			
+			for(int i=0; i<args.length-LAST_SPECIAL_PARAMETERS; i++){
+				FileInputStream fs = new FileInputStream(args[i]);
+				allFiles.add(fs);				
+			}
+			
+			//put all in one single input stream
 			InputStream is = new SequenceInputStream(Collections.enumeration(allFiles));
 			System.out.println("Loaded GOTO files");
+			
+			
+			
 			
 			//Lexer and parser
 			Analex analex = new Analex(is);
@@ -86,6 +111,30 @@ public class GOTOCompiler {
 		}
 	}
 	
+	
+	/**
+	 * Parse all the input variable's values to GOTO increment instructions
+	 * @param csv
+	 * @return
+	 */
+	private static String parseGOTOInputVarsValuesToGOTOIncInstructions(String csv){
+		String res = "";
+		String[] values = csv.split("\\,");
+		
+		for(int i=0; i<values.length; i++){
+			int value = Math.abs(new Integer(values[i]).intValue());
+			String index = values.length > 1 ? String.valueOf(i+1) : "";
+			String var = "X"+index;
+			
+			
+			for(int j=0; j<value; j++){
+				String newLine = System.getProperty("line.separator") ;
+				res += var+ "<-" + var +"+"+ 1 + newLine;
+			}
+		}
+		
+		return res;
+	}
 	
 
 }

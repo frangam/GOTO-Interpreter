@@ -36,14 +36,29 @@ options{
 
 
 
-protected NL: "\n" {newline();};
-BTF: (' '|'\t'|NL) {$setType(Token.SKIP);};
+WHITE : (' '|'\t'|NL) { $setType(Token.SKIP); };
+
+protected NL : (
+	("\r\n") => "\r\n" // MS-DOS
+	| '\r' // MACINTOSH
+	| '\n' // UNIX
+) { newline(); }
+;
+
+protected COMMENT_ONE_LINE: "//" (~('\n'|'\r'))* { $setType(Token.SKIP); };
+
+protected COMMENT_MULTI_LINES : "/*" ( 
+	('*' NL) => '*' NL
+	| ('*' ~('/'|'\n'|'\r')) => '*' ~('/'|'\n'|'\r')  //('*' ~('/'|NL)) => '*' ~('/'|NL) this is not possible in ANTLR 
+	| NL
+	| ~( '\n' | '\r' | '*' ) //~( NL | '*' ) this is not possible in ANTLR
+)* "*/" { $setType(Token.SKIP); }
+;
 
 protected DIGIT: ('0'..'9');
-protected LETTER: ('A'..'Z');//('a'..'z'|'A'..'Z');
+protected LETTER: ('A'..'Z');
 
-
-ID options {testLiterals=true;}: LETTER(DIGIT)*; //letra (seguida de digito)
+ID:LETTER(DIGIT)*;
 //STRING: '"'LETTER(LETTER|DIGIT|'_'|' ')*'"';
 NUMBER: (DIGIT)+;
 COMMA:',';

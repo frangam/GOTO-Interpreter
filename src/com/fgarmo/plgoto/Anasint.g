@@ -25,7 +25,8 @@ header{
 class Anasint extends Parser; 
 
 options{
-   	buildAST=true;   
+   	buildAST=true; 
+   	k=2;  
 }
 
 tokens{ 
@@ -50,6 +51,11 @@ instructions: (instruction)*
 
 macro_def: DEFMACRO! instruction (instruction)* ENDMACRO!
 	{#macro_def = #(#[MACRO,"MACRO"], ##);}
+;
+
+instruction2: assigment
+	| conditional
+	| labelled_instruction
 ;
 
 instruction : (ID ASSIG)=> assigment

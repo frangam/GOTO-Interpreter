@@ -26,9 +26,11 @@ public interface AnalexTokenTypes {
 	int PLUS = 22;
 	int MINUS = 23;
 	int NUMBER = 24;
-	int NL = 25;
-	int BTF = 26;
-	int DIGIT = 27;
-	int LETTER = 28;
-	int COMMA = 29;
+	int WHITE = 25;
+	int NL = 26;
+	int COMMENT_ONE_LINE = 27;
+	int COMMENT_MULTI_LINES = 28;
+	int DIGIT = 29;
+	int LETTER = 30;
+	int COMMA = 31;
 }
