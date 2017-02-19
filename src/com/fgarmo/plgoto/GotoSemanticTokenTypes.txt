@@ -1,5 +1,5 @@
-// $ANTLR : Anasint.g -> AnasintTokenTypes.txt$
-Anasint    // output token vocab name
+// $ANTLR : GotoSemantic.g -> GotoSemanticTokenTypes.txt$
+GotoSemantic    // output token vocab name
 PROGRAM=4
 MACRO=5
 BLOCK=6

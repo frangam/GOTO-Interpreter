@@ -1,6 +1,8 @@
 // $ANTLR : "Anasint.g" -> "Anasint.java"$
 
 	package com.fgarmo.plgoto;
+	import java.util.*;
+	import antlr.*;
 
 import antlr.TokenBuffer;
 import antlr.TokenStreamException;
@@ -23,6 +25,19 @@ import antlr.collections.impl.ASTArray;
 
 public class Anasint extends antlr.LLkParser       implements AnasintTokenTypes
  {
+
+	public Map<String, AST[]> labels = new HashMap<String, AST[]>();
+	ASTFactory factory = new ASTFactory();
+	
+	void registerLeftLabelledInst(String label, AST[] expression){
+		if(!labels.containsKey(label)){
+			labels.put(label, expression);
+		}
+		else{
+			//System.out.println("Compilation Error: duplicated label "+label);
+			throw new RuntimeException("Compilation Error: duplicated label "+label);	
+		}	
+	}
 
 protected Anasint(TokenBuffer tokenBuf, int k) {
   super(tokenBuf,k);
@@ -91,21 +106,30 @@ public Anasint(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			switch ( LA(1)) {
+			case EOF:
 			case DEFMACRO:
 			{
-				macro_def();
-				astFactory.addASTChild(currentAST, returnAST);
-				order();
-				astFactory.addASTChild(currentAST, returnAST);
+				{
+				_loop6:
+				do {
+					if ((LA(1)==DEFMACRO)) {
+						macro_def();
+						astFactory.addASTChild(currentAST, returnAST);
+					}
+					else {
+						break _loop6;
+					}
+					
+				} while (true);
+				}
 				order_AST = (AST)currentAST.root;
 				break;
 			}
-			case EOF:
-			case ID:
 			case LSB:
+			case ID_VAR:
 			case IF:
 			{
-				instructions();
+				instructions_block();
 				astFactory.addASTChild(currentAST, returnAST);
 				order_AST = (AST)currentAST.root;
 				break;
@@ -135,21 +159,12 @@ public Anasint(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			match(DEFMACRO);
-			instruction();
+			AST tmp2_AST = null;
+			tmp2_AST = astFactory.create(LT(1));
+			astFactory.addASTChild(currentAST, tmp2_AST);
+			match(ID_MACRO);
+			instructions_block();
 			astFactory.addASTChild(currentAST, returnAST);
-			{
-			_loop10:
-			do {
-				if ((LA(1)==ID||LA(1)==LSB||LA(1)==IF)) {
-					instruction();
-					astFactory.addASTChild(currentAST, returnAST);
-				}
-				else {
-					break _loop10;
-				}
-				
-			} while (true);
-			}
 			match(ENDMACRO);
 			if ( inputState.guessing==0 ) {
 				macro_def_AST = (AST)currentAST.root;
@@ -172,74 +187,48 @@ public Anasint(ParserSharedInputState state) {
 		returnAST = macro_def_AST;
 	}
 	
-	public final void instructions() throws RecognitionException, TokenStreamException {
+	public final void instructions_block() throws RecognitionException, TokenStreamException {
 		
 		returnAST = null;
 		ASTPair currentAST = new ASTPair();
-		AST instructions_AST = null;
+		AST instructions_block_AST = null;
 		
 		try {      // for error handling
+			switch ( LA(1)) {
+			case LSB:
 			{
-			_loop7:
-			do {
-				if ((LA(1)==ID||LA(1)==LSB||LA(1)==IF)) {
-					instruction();
+				labelled_instruction();
+				astFactory.addASTChild(currentAST, returnAST);
+				instructions_block_AST = (AST)currentAST.root;
+				break;
+			}
+			case ID_VAR:
+			case IF:
+			{
+				basic_instruction();
+				astFactory.addASTChild(currentAST, returnAST);
+				{
+				switch ( LA(1)) {
+				case LSB:
+				case ID_VAR:
+				case IF:
+				{
+					instructions_block();
 					astFactory.addASTChild(currentAST, returnAST);
+					break;
 				}
-				else {
-					break _loop7;
+				case EOF:
+				case ENDMACRO:
+				{
+					break;
 				}
-				
-			} while (true);
-			}
-			if ( inputState.guessing==0 ) {
-				instructions_AST = (AST)currentAST.root;
-				instructions_AST = (AST)astFactory.make( (new ASTArray(2)).add(astFactory.create(INSTRUCTIONS,"INSTRUCTIONS")).add(instructions_AST));
-				currentAST.root = instructions_AST;
-				currentAST.child = instructions_AST!=null &&instructions_AST.getFirstChild()!=null ?
-					instructions_AST.getFirstChild() : instructions_AST;
-				currentAST.advanceChildToEnd();
-			}
-			instructions_AST = (AST)currentAST.root;
-		}
-		catch (RecognitionException ex) {
-			if (inputState.guessing==0) {
-				reportError(ex);
-				recover(ex,_tokenSet_0);
-			} else {
-			  throw ex;
-			}
-		}
-		returnAST = instructions_AST;
-	}
-	
-	public final void instruction() throws RecognitionException, TokenStreamException {
-		
-		returnAST = null;
-		ASTPair currentAST = new ASTPair();
-		AST instruction_AST = null;
-		
-		try {      // for error handling
-			switch ( LA(1)) {
-			case ID:
-			{
-				assigment();
-				astFactory.addASTChild(currentAST, returnAST);
-				instruction_AST = (AST)currentAST.root;
-				break;
-			}
-			case LSB:
-			{
-				labelled_instruction();
-				astFactory.addASTChild(currentAST, returnAST);
-				instruction_AST = (AST)currentAST.root;
-				break;
-			}
-			case IF:
-			{
-				conditional();
-				astFactory.addASTChild(currentAST, returnAST);
-				instruction_AST = (AST)currentAST.root;
+				default:
+				{
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				}
+				}
+				instructions_block_AST = (AST)currentAST.root;
 				break;
 			}
 			default:
@@ -256,117 +245,7 @@ public Anasint(ParserSharedInputState state) {
 			  throw ex;
 			}
 		}
-		returnAST = instruction_AST;
-	}
-	
-	public final void instruction2() throws RecognitionException, TokenStreamException {
-		
-		returnAST = null;
-		ASTPair currentAST = new ASTPair();
-		AST instruction2_AST = null;
-		
-		try {      // for error handling
-			switch ( LA(1)) {
-			case ID:
-			{
-				assigment();
-				astFactory.addASTChild(currentAST, returnAST);
-				instruction2_AST = (AST)currentAST.root;
-				break;
-			}
-			case IF:
-			{
-				conditional();
-				astFactory.addASTChild(currentAST, returnAST);
-				instruction2_AST = (AST)currentAST.root;
-				break;
-			}
-			case LSB:
-			{
-				labelled_instruction();
-				astFactory.addASTChild(currentAST, returnAST);
-				instruction2_AST = (AST)currentAST.root;
-				break;
-			}
-			default:
-			{
-				throw new NoViableAltException(LT(1), getFilename());
-			}
-			}
-		}
-		catch (RecognitionException ex) {
-			if (inputState.guessing==0) {
-				reportError(ex);
-				recover(ex,_tokenSet_0);
-			} else {
-			  throw ex;
-			}
-		}
-		returnAST = instruction2_AST;
-	}
-	
-	public final void assigment() throws RecognitionException, TokenStreamException {
-		
-		returnAST = null;
-		ASTPair currentAST = new ASTPair();
-		AST assigment_AST = null;
-		
-		try {      // for error handling
-			AST tmp3_AST = null;
-			tmp3_AST = astFactory.create(LT(1));
-			astFactory.addASTChild(currentAST, tmp3_AST);
-			match(ID);
-			AST tmp4_AST = null;
-			tmp4_AST = astFactory.create(LT(1));
-			astFactory.makeASTRoot(currentAST, tmp4_AST);
-			match(ASSIG);
-			expr_arithm();
-			astFactory.addASTChild(currentAST, returnAST);
-			assigment_AST = (AST)currentAST.root;
-		}
-		catch (RecognitionException ex) {
-			if (inputState.guessing==0) {
-				reportError(ex);
-				recover(ex,_tokenSet_2);
-			} else {
-			  throw ex;
-			}
-		}
-		returnAST = assigment_AST;
-	}
-	
-	public final void conditional() throws RecognitionException, TokenStreamException {
-		
-		returnAST = null;
-		ASTPair currentAST = new ASTPair();
-		AST conditional_AST = null;
-		
-		try {      // for error handling
-			AST tmp5_AST = null;
-			tmp5_AST = astFactory.create(LT(1));
-			astFactory.makeASTRoot(currentAST, tmp5_AST);
-			match(IF);
-			expr();
-			astFactory.addASTChild(currentAST, returnAST);
-			AST tmp6_AST = null;
-			tmp6_AST = astFactory.create(LT(1));
-			astFactory.makeASTRoot(currentAST, tmp6_AST);
-			match(GOTO);
-			AST tmp7_AST = null;
-			tmp7_AST = astFactory.create(LT(1));
-			astFactory.addASTChild(currentAST, tmp7_AST);
-			match(ID);
-			conditional_AST = (AST)currentAST.root;
-		}
-		catch (RecognitionException ex) {
-			if (inputState.guessing==0) {
-				reportError(ex);
-				recover(ex,_tokenSet_2);
-			} else {
-			  throw ex;
-			}
-		}
-		returnAST = conditional_AST;
+		returnAST = instructions_block_AST;
 	}
 	
 	public final void labelled_instruction() throws RecognitionException, TokenStreamException {
@@ -374,19 +253,44 @@ public Anasint(ParserSharedInputState state) {
 		returnAST = null;
 		ASTPair currentAST = new ASTPair();
 		AST labelled_instruction_AST = null;
+		Token  i = null;
+		AST i_AST = null;
+		AST a_AST = null;
+		AST b_AST = null;
 		
 		try {      // for error handling
 			match(LSB);
-			AST tmp9_AST = null;
-			tmp9_AST = astFactory.create(LT(1));
-			astFactory.makeASTRoot(currentAST, tmp9_AST);
-			match(ID);
+			i = LT(1);
+			i_AST = astFactory.create(i);
+			astFactory.addASTChild(currentAST, i_AST);
+			match(ID_LABEL);
 			match(RSB);
-			basic_instruction();
+			stats();
+			a_AST = (AST)returnAST;
 			astFactory.addASTChild(currentAST, returnAST);
+			{
+			switch ( LA(1)) {
+			case LSB:
+			{
+				labelled_instruction();
+				b_AST = (AST)returnAST;
+				astFactory.addASTChild(currentAST, returnAST);
+				break;
+			}
+			case EOF:
+			case ENDMACRO:
+			{
+				break;
+			}
+			default:
+			{
+				throw new NoViableAltException(LT(1), getFilename());
+			}
+			}
+			}
 			if ( inputState.guessing==0 ) {
 				labelled_instruction_AST = (AST)currentAST.root;
-				labelled_instruction_AST = (AST)astFactory.make( (new ASTArray(2)).add(astFactory.create(LEFT_LABEL,"LEFT LABEL")).add(labelled_instruction_AST));
+				labelled_instruction_AST = (AST)astFactory.make( (new ASTArray(2)).add(astFactory.create(BLOCK,"BLOCK")).add(labelled_instruction_AST));
 				currentAST.root = labelled_instruction_AST;
 				currentAST.child = labelled_instruction_AST!=null &&labelled_instruction_AST.getFirstChild()!=null ?
 					labelled_instruction_AST.getFirstChild() : labelled_instruction_AST;
@@ -413,17 +317,37 @@ public Anasint(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			switch ( LA(1)) {
-			case ID:
+			case ID_VAR:
 			{
-				assigment();
+				AST tmp6_AST = null;
+				tmp6_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp6_AST);
+				match(ID_VAR);
+				AST tmp7_AST = null;
+				tmp7_AST = astFactory.create(LT(1));
+				astFactory.makeASTRoot(currentAST, tmp7_AST);
+				match(ASSIG);
+				expr();
 				astFactory.addASTChild(currentAST, returnAST);
 				basic_instruction_AST = (AST)currentAST.root;
 				break;
 			}
 			case IF:
 			{
-				conditional();
+				AST tmp8_AST = null;
+				tmp8_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp8_AST);
+				match(IF);
+				expr();
 				astFactory.addASTChild(currentAST, returnAST);
+				AST tmp9_AST = null;
+				tmp9_AST = astFactory.create(LT(1));
+				astFactory.makeASTRoot(currentAST, tmp9_AST);
+				match(GOTO);
+				AST tmp10_AST = null;
+				tmp10_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp10_AST);
+				match(ID_LABEL);
 				basic_instruction_AST = (AST)currentAST.root;
 				break;
 			}
@@ -432,65 +356,6 @@ public Anasint(ParserSharedInputState state) {
 				throw new NoViableAltException(LT(1), getFilename());
 			}
 			}
-		}
-		catch (RecognitionException ex) {
-			if (inputState.guessing==0) {
-				reportError(ex);
-				recover(ex,_tokenSet_2);
-			} else {
-			  throw ex;
-			}
-		}
-		returnAST = basic_instruction_AST;
-	}
-	
-	public final void expr_arithm() throws RecognitionException, TokenStreamException {
-		
-		returnAST = null;
-		ASTPair currentAST = new ASTPair();
-		AST expr_arithm_AST = null;
-		
-		try {      // for error handling
-			atom();
-			astFactory.addASTChild(currentAST, returnAST);
-			{
-			_loop29:
-			do {
-				if ((LA(1)==PLUS||LA(1)==MINUS)) {
-					{
-					switch ( LA(1)) {
-					case PLUS:
-					{
-						AST tmp11_AST = null;
-						tmp11_AST = astFactory.create(LT(1));
-						astFactory.makeASTRoot(currentAST, tmp11_AST);
-						match(PLUS);
-						break;
-					}
-					case MINUS:
-					{
-						AST tmp12_AST = null;
-						tmp12_AST = astFactory.create(LT(1));
-						astFactory.makeASTRoot(currentAST, tmp12_AST);
-						match(MINUS);
-						break;
-					}
-					default:
-					{
-						throw new NoViableAltException(LT(1), getFilename());
-					}
-					}
-					}
-					atom();
-					astFactory.addASTChild(currentAST, returnAST);
-				}
-				else {
-					break _loop29;
-				}
-				
-			} while (true);
-			}
-			expr_arithm_AST = (AST)currentAST.root;
 		}
 		catch (RecognitionException ex) {
 			if (inputState.guessing==0) {
@@ -500,98 +365,32 @@ public Anasint(ParserSharedInputState state) {
 			  throw ex;
 			}
 		}
-		returnAST = expr_arithm_AST;
+		returnAST = basic_instruction_AST;
 	}
 	
-	public final void expr() throws RecognitionException, TokenStreamException {
+	public final void stats() throws RecognitionException, TokenStreamException {
 		
 		returnAST = null;
 		ASTPair currentAST = new ASTPair();
-		AST expr_AST = null;
+		AST stats_AST = null;
 		
 		try {      // for error handling
-			expr_arithm();
-			astFactory.addASTChild(currentAST, returnAST);
 			{
-			switch ( LA(1)) {
-			case LOWER:
-			case GREATER:
-			case LOWEREQ:
-			case GREATEREQ:
-			case EQUAL:
-			case DISTINCT:
-			{
-				{
-				switch ( LA(1)) {
-				case LOWER:
-				{
-					AST tmp13_AST = null;
-					tmp13_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp13_AST);
-					match(LOWER);
-					break;
+			int _cnt16=0;
+			_loop16:
+			do {
+				if ((LA(1)==ID_VAR||LA(1)==IF)) {
+					basic_instruction();
+					astFactory.addASTChild(currentAST, returnAST);
 				}
-				case GREATER:
-				{
-					AST tmp14_AST = null;
-					tmp14_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp14_AST);
-					match(GREATER);
-					break;
+				else {
+					if ( _cnt16>=1 ) { break _loop16; } else {throw new NoViableAltException(LT(1), getFilename());}
 				}
-				case LOWEREQ:
-				{
-					AST tmp15_AST = null;
-					tmp15_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp15_AST);
-					match(LOWEREQ);
-					break;
-				}
-				case GREATEREQ:
-				{
-					AST tmp16_AST = null;
-					tmp16_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp16_AST);
-					match(GREATEREQ);
-					break;
-				}
-				case EQUAL:
-				{
-					AST tmp17_AST = null;
-					tmp17_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp17_AST);
-					match(EQUAL);
-					break;
-				}
-				case DISTINCT:
-				{
-					AST tmp18_AST = null;
-					tmp18_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp18_AST);
-					match(DISTINCT);
-					break;
-				}
-				default:
-				{
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				}
-				}
-				expr_arithm();
-				astFactory.addASTChild(currentAST, returnAST);
-				break;
+				
+				_cnt16++;
+			} while (true);
 			}
-			case GOTO:
-			{
-				break;
-			}
-			default:
-			{
-				throw new NoViableAltException(LT(1), getFilename());
-			}
-			}
-			}
-			expr_AST = (AST)currentAST.root;
+			stats_AST = (AST)currentAST.root;
 		}
 		catch (RecognitionException ex) {
 			if (inputState.guessing==0) {
@@ -601,40 +400,104 @@ public Anasint(ParserSharedInputState state) {
 			  throw ex;
 			}
 		}
-		returnAST = expr_AST;
+		returnAST = stats_AST;
 	}
 	
-	public final void atom() throws RecognitionException, TokenStreamException {
+	public final void expr() throws RecognitionException, TokenStreamException {
 		
 		returnAST = null;
 		ASTPair currentAST = new ASTPair();
-		AST atom_AST = null;
+		AST expr_AST = null;
 		
 		try {      // for error handling
-			switch ( LA(1)) {
-			case NUMBER:
-			{
-				AST tmp19_AST = null;
-				tmp19_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp19_AST);
-				match(NUMBER);
-				atom_AST = (AST)currentAST.root;
-				break;
+			boolean synPredMatched23 = false;
+			if (((LA(1)==ID_VAR) && (LA(2)==PLUS||LA(2)==MINUS))) {
+				int _m23 = mark();
+				synPredMatched23 = true;
+				inputState.guessing++;
+				try {
+					{
+					match(ID_VAR);
+					{
+					switch ( LA(1)) {
+					case PLUS:
+					{
+						match(PLUS);
+						break;
+					}
+					case MINUS:
+					{
+						match(MINUS);
+						break;
+					}
+					default:
+					{
+						throw new NoViableAltException(LT(1), getFilename());
+					}
+					}
+					}
+					}
+				}
+				catch (RecognitionException pe) {
+					synPredMatched23 = false;
+				}
+				rewind(_m23);
+inputState.guessing--;
 			}
-			case ID:
-			{
-				AST tmp20_AST = null;
-				tmp20_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp20_AST);
-				match(ID);
-				atom_AST = (AST)currentAST.root;
-				break;
+			if ( synPredMatched23 ) {
+				AST tmp11_AST = null;
+				tmp11_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp11_AST);
+				match(ID_VAR);
+				{
+				switch ( LA(1)) {
+				case PLUS:
+				{
+					AST tmp12_AST = null;
+					tmp12_AST = astFactory.create(LT(1));
+					astFactory.makeASTRoot(currentAST, tmp12_AST);
+					match(PLUS);
+					break;
+				}
+				case MINUS:
+				{
+					AST tmp13_AST = null;
+					tmp13_AST = astFactory.create(LT(1));
+					astFactory.makeASTRoot(currentAST, tmp13_AST);
+					match(MINUS);
+					break;
+				}
+				default:
+				{
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				}
+				}
+				AST tmp14_AST = null;
+				tmp14_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp14_AST);
+				match(ONE);
+				expr_AST = (AST)currentAST.root;
 			}
-			default:
-			{
+			else if ((LA(1)==ID_VAR) && (LA(2)==DISTINCT)) {
+				AST tmp15_AST = null;
+				tmp15_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp15_AST);
+				match(ID_VAR);
+				AST tmp16_AST = null;
+				tmp16_AST = astFactory.create(LT(1));
+				astFactory.makeASTRoot(currentAST, tmp16_AST);
+				match(DISTINCT);
+				AST tmp17_AST = null;
+				tmp17_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp17_AST);
+				match(ZERO);
+				expr_AST = (AST)currentAST.root;
+			}
+			else {
 				throw new NoViableAltException(LT(1), getFilename());
 			}
-			}
+			
 		}
 		catch (RecognitionException ex) {
 			if (inputState.guessing==0) {
@@ -644,7 +507,7 @@ public Anasint(ParserSharedInputState state) {
 			  throw ex;
 			}
 		}
-		returnAST = atom_AST;
+		returnAST = expr_AST;
 	}
 	
 	
@@ -655,25 +518,22 @@ public Anasint(ParserSharedInputState state) {
 		"NULL_TREE_LOOKAHEAD",
 		"PROGRAM",
 		"MACRO",
-		"INSTRUCTIONS",
-		"LEFT_LABEL",
+		"BLOCK",
 		"DEFMACRO",
+		"ID_MACRO",
 		"ENDMACRO",
-		"ID",
-		"ASSIG",
 		"LSB",
+		"ID_LABEL",
+		"RSB",
+		"ID_VAR",
+		"ASSIG",
 		"IF",
 		"GOTO",
-		"RSB",
-		"LOWER",
-		"GREATER",
-		"LOWEREQ",
-		"GREATEREQ",
-		"EQUAL",
-		"DISTINCT",
 		"PLUS",
 		"MINUS",
-		"NUMBER"
+		"ONE",
+		"DISTINCT",
+		"ZERO"
 	};
 	
 	protected void buildTokenTypeASTClassMap() {
@@ -686,27 +546,27 @@ public Anasint(ParserSharedInputState state) {
 	}
 	public static final BitSet _tokenSet_0 = new BitSet(mk_tokenSet_0());
 	private static final long[] mk_tokenSet_1() {
-		long[] data = { 13570L, 0L};
+		long[] data = { 130L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_1 = new BitSet(mk_tokenSet_1());
 	private static final long[] mk_tokenSet_2() {
-		long[] data = { 13826L, 0L};
+		long[] data = { 514L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_2 = new BitSet(mk_tokenSet_2());
 	private static final long[] mk_tokenSet_3() {
-		long[] data = { 4158978L, 0L};
+		long[] data = { 42498L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_3 = new BitSet(mk_tokenSet_3());
 	private static final long[] mk_tokenSet_4() {
-		long[] data = { 16384L, 0L};
+		long[] data = { 1538L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_4 = new BitSet(mk_tokenSet_4());
 	private static final long[] mk_tokenSet_5() {
-		long[] data = { 16741890L, 0L};
+		long[] data = { 108034L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_5 = new BitSet(mk_tokenSet_5());

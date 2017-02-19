@@ -26,8 +26,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.fgarmo.plgoto.node.Node;
+
 import antlr.RecognitionException;
-import antlr.Token;
 import antlr.TokenStreamException;
 import antlr.collections.AST;
 import antlr.debug.misc.ASTFrame;
@@ -52,12 +53,12 @@ public class GOTOCompiler {
 			List<InputStream> allFiles = new ArrayList<InputStream>();
 			
 			//parse input var values to GOTO increment instructions
-			if(args.length>2){
-				String inVarValues = parseGOTOInputVarsValuesToGOTOIncInstructions(args[args.length-LAST_SPECIAL_PARAMETERS]);
-				InputStream stream = new ByteArrayInputStream(inVarValues.getBytes(StandardCharsets.UTF_8));
-				
-				allFiles.add(stream);		
-			}
+//			if(args.length>2){
+//				String inVarValues = parseGOTOInputVarsValuesToGOTOIncInstructions(args[args.length-LAST_SPECIAL_PARAMETERS]);
+//				InputStream stream = new ByteArrayInputStream(inVarValues.getBytes(StandardCharsets.UTF_8));
+//				
+//				allFiles.add(stream);		
+//			}
 			
 			for(int i=0; i<args.length-LAST_SPECIAL_PARAMETERS; i++){
 				FileInputStream fs = new FileInputStream(args[i]);
@@ -82,19 +83,26 @@ public class GOTOCompiler {
 			//parser
 	        Anasint anasint = new Anasint(analex);
 	        anasint.program();
-	        AST a = anasint.getAST();
+	        AST parserTree = anasint.getAST();
 	        
 	        //show window with AST
 	        boolean showAST = Boolean.valueOf(args[args.length-1]);
 	        if(showAST){
-		        ASTFrame af = new ASTFrame(args[0],a);
+		        ASTFrame af = new ASTFrame(args[0], parserTree);
 		        af.setVisible(true);
 	        }
 	        
+	        //semantic
+	        GotoSemantic semanticChecker = new GotoSemantic();
+	        semanticChecker.check_semantic(parserTree);
+	        
+	        
 	        System.out.println("Running program");
 	        //compiler
-	        Anasint2 anasint2 = new Anasint2();
-	       	anasint2.program(a);
+	        GotoWalker walker = new GotoWalker();
+	        walker.labels = semanticChecker.labels;
+	        Node root = walker.walk(parserTree);
+	        root.eval();
 	       	
 	       	
 	       	args[0] = String.valueOf(result);

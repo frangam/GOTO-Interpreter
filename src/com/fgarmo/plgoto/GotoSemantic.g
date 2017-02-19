@@ -15,7 +15,7 @@
  */
  
 //-----------------------------------------------
-// Grammar for PL GOTO
+// Semantic Checker of GOTO
 //-----------------------------------------------
 
 header{
@@ -24,22 +24,16 @@ header{
 	import antlr.*;
 }
 
-class Anasint extends Parser; 
+class GotoSemantic extends TreeParser; 
 
 options{
-   	buildAST=true; 
-   	k=2;  
+   	 importVocab = Anasint;  
 }
 
-tokens{ 
-	PROGRAM;
-	MACRO;
-	BLOCK;
-}
 
 {
 	public Map<String, AST[]> labels = new HashMap<String, AST[]>();
-	ASTFactory factory = new ASTFactory();
+	//ASTFactory factory = new ASTFactory();
 	
 	void registerLeftLabelledInst(String label, AST[] expression){
 		if(!labels.containsKey(label)){
@@ -53,36 +47,38 @@ tokens{
 }
 
 // The Program
-program: order
-	{#program = #(#[PROGRAM,"PROGRAM"], ##);}
+check_semantic: #(PROGRAM order)
 ;
 
-order: (DEFMACRO ID_MACRO)=> (macro_def)*
+order: (macro_def)*
  	| instructions_block
 	;
 
-macro_def: DEFMACRO! ID_MACRO instructions_block ENDMACRO!
-	{#macro_def = #(#[MACRO,"MACRO"], ##);}
+macro_def: #(MACRO ID_MACRO instructions_block)
 ;
 
-instructions_block: (LSB! ID_LABEL) => labelled_instruction
+instructions_block: labelled_instruction
 	| basic_instruction (instructions_block)?
 ;
 
-labelled_instruction: LSB! i:ID_LABEL RSB! a:stats (b:labelled_instruction)?
-	{#labelled_instruction = #(#[BLOCK,"BLOCK"], ##);}
-	//{System.out.println(a.toStringTree());}//registerLeftLabelledInst(i.getText(), new AST[]{factory.dupTree(i).getNextSibling()), factory.dupTree(i.getNextSibling())});}
+labelled_instruction: #(BLOCK i:ID_LABEL a:stats (b:labelled_instruction)?)
+	{registerLeftLabelledInst(i.getText(), new AST[]{a, b});}
 ;
 
 stats: (basic_instruction)+
 ;
   
-basic_instruction: (ID_VAR ASSIG) => ID_VAR ASSIG^ expr
-	| IF expr GOTO^ ID_LABEL
+basic_instruction: #(ASSIG ID_VAR expr_arithm)
+	| #(GOTO IF expr ID_LABEL)
 	;
 
 
 // Expressions
-expr : (ID_VAR (PLUS|MINUS))=>ID_VAR (PLUS^|MINUS^) ONE
-	| ID_VAR DISTINCT^ ZERO
-;
+expr: 
+	#(DISTINCT v1:ID_VAR ZERO)  
+	;
+	
+expr_arithm: 
+	#(PLUS v1:ID_VAR ONE) 
+	| #(MINUS v2:ID_VAR ONE)
+	;

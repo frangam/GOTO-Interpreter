@@ -56,25 +56,29 @@ protected COMMENT_MULTI_LINES : "/*" (
 ;
 
 protected DIGIT: ('0'..'9');
-protected LETTER: ('A'..'Z');
+protected LABEL: ('A'..'W');
+protected VAR: ('X'|'Y'|'Z');
 
-ID:LETTER(DIGIT)*;
+ID_VAR:VAR(DIGIT)*;
+ID_LABEL:LABEL(DIGIT)*;
+ID_MACRO:("\\w")+;
 //STRING: '"'LETTER(LETTER|DIGIT|'_'|' ')*'"';
-NUMBER: (DIGIT)+;
+ONE:'1';
+ZERO:'0';
 COMMA:',';
 
 ASSIG: "<-";
 LSB:'['; //left square bracket
 RSB:']'; //right square bracket
-//LP:'('; //left parenthesis
-//RP:')'; //right parenthesis
-//SC:';'; //semicolon
-//DOT:'.';
+LP:'('; //left parenthesis
+RP:')'; //right parenthesis
+SC:';'; //semicolon
+DOT:'.';
 PLUS:'+';
 MINUS:'-';
 
-//MUL:'*';
-//DIV:'/';
+MUL:'*';
+DIV:'/';
 EQUAL: '=';
 DISTINCT: "!=";
 
