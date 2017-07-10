@@ -1,8 +1,8 @@
 # PL-GOTO-Compiler
-A compiler for the computational model PL GOTO. Data Set: Natural Numbers (N).
+An interpreter for the computational model GOTO. Data Set: Natural Numbers (N).
 
 ### IDE
-I have developed an IDE for programming and compiling GOTO. Its source code is available [here].
+I have developed an IDE for programming and interpreting GOTO source code. Its source code is available [here].
 (Download link comming soon)
 
 # Syntax
