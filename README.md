@@ -1,4 +1,4 @@
-# PL-GOTO-Compiler
+# GOTO-Interpreter
 An interpreter for the computational model GOTO. Data Set: Natural Numbers (N).
 
 ### IDE
