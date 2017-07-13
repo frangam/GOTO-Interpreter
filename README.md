@@ -1,11 +1,21 @@
 # GOTO-Interpreter
-An interpreter for the computational model GOTO. Data Set: Natural Numbers (N).
+An interpreter for the computational model language called GOTO. Data Set: Natural Numbers (N).
+
+### Requirements for compiling
+We are using ANTLR v2, that is a powerful parser generator for reading, processing, executing, or translating structured text or binary files. More info about [ANTLTR v2].
+
+If you want to modify and compile the code you must follow this steps:
+- Install [Eclipse Mars] version (compatible with ANTLR v2).
+- Install ANTLR plugin for Eclipse: In Eclipse Mars, go to Install New Software from the Help menu. Add this URL site  http://antlreclipse.sourceforge.net/updates/ and install all the packages are shown.
+- Restart Eclipse.
+- Import this project.
+- Right click on the project and select Change to ANTLR.
 
 ### IDE
 I have developed an IDE for programming and interpreting GOTO source code. Its source code is available [here].
 (Download link comming soon)
 
-# Syntax
+# GOTO Syntax
 
 ### Variables
 - Input: X1(=X), X2, X3, ... 
@@ -37,3 +47,5 @@ A GOTO macro is a GOTO program makes a specific task.
 ```
 
 [here]:<https://github.com/garmo/GOTO-IDE>
+[Eclipse Mars]:<https://eclipse.org/mars/>
+[ANTLTR v2]:<http://www.antlr2.org/>
